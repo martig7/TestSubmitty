@@ -17,8 +17,8 @@ jobs:
       - name: Check for existing bot comments
         id: check-comments
         run: |
-          ISSUE_NUMBER=${{ github.event.issue.number }}
-          BOT_COMMENT_EXISTS=$(gh issue view "$ISSUE_NUMBER" --json comments --jq '.comments[].body' | grep -q "Hi @$USERNAME," && echo "true" || echo "false")
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          BOT_COMMENT_EXISTS=$(gh pull_request view "$PR_NUMBER" --json comments --jq '.comments[].body' | grep -q "Hi @$USERNAME," && echo "true" || echo "false")
           echo "bot_comment_exists=$BOT_COMMENT_EXISTS" >> $GITHUB_ENV
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -27,8 +27,8 @@ jobs:
       - name: First PR Open
         if: env.bot_comment_exists == 'false'
         run: |
-          gh issue comment "$ISSUE" --body "Hi @$USERNAME,"$'\n\n'"$(cat .github/FIRST_PR_OPEN.md)"
+          gh pull_request comment "$PULL_REQUEST" --body "Hi @$USERNAME,"$'\n\n'"$(cat .github/FIRST_PR_OPEN.md)"
         env:
-          ISSUE: ${{ github.event.issue.number }}
+          PULL_REQUEST: ${{ github.event.pull_request.number }}
           USERNAME: ${{ github.event.comment.user.login }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
